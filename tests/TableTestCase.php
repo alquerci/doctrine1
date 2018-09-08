@@ -36,6 +36,7 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
     public function prepareTables()
     {
         $this->tables[] = 'FieldNameTest';
+        $this->tables[] = 'I18nFilterTest';
         parent::prepareTables();
     }
 
@@ -55,6 +56,31 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
         $unserializedTable->initializeFromCache($this->objTable->getConnection());
 
         $this->assertEqual($table->getColumns(), $unserializedTable->getColumns());
+    }
+
+    public function testSerializeWithI18nFilter()
+    {
+        $table = $this->conn->getTable('I18nFilterTest');
+
+        $record = $table->create();
+        $record['name'] = 'foo';
+        $this->assertEqual('foo', $record['name']);
+
+        // Test the I18nFilterTest record that include the second filter.
+        $this->assertTrue(in_array('I18nFilterTestFilter', array_map('get_class', $table->getFilters())));
+        $expectedFilterNames = array_map('get_class', $table->getFilters());
+
+        $serializedTable = serialize($table);
+
+        $unserializedTable = unserialize($serializedTable);
+        $unserializedTable->initializeFromCache($this->conn);
+
+        $record = $unserializedTable->create();
+
+        $this->assertEqual($expectedFilterNames, array_map('get_class', $unserializedTable->getFilters()));
+
+        $record['name'] = 'foo';
+        $this->assertEqual('foo', $record['name']);
     }
 
     public function testFieldConversion()
