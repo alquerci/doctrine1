@@ -80,19 +80,11 @@ class Doctrine_I18n extends Doctrine_Record_Generator
         $options = array('className' => $this->_options['className']);
 
         $cols = $this->_options['table']->getColumns();
-        $table = $this->_options['table'];
 
-        $columnNames = (array) $table->getOption('generator_i18n_columnNames');
-        $columns = (array) $table->getOption('generator_i18n_columns');
-        $fieldNames = (array) $table->getOption('generator_i18n_fieldNames');
-
+        $columns = array();
         foreach ($cols as $column => $definition) {
             $fieldName = $this->_options['table']->getFieldName($column);
             if (in_array($fieldName, $this->_options['fields'])) {
-                $columnNames[$fieldName] = $column;
-                $fieldNames[$column] = $cols;
-                $columns[$column] = $definition;
-
                 if ($column != $fieldName) {
                     $column .= ' as ' . $fieldName;
                 }
@@ -100,10 +92,6 @@ class Doctrine_I18n extends Doctrine_Record_Generator
                 $this->_options['table']->removeColumn($fieldName);
             }
         }
-
-        $table->setOption('generator_i18n_columnNames', $columnNames);
-        $table->setOption('generator_i18n_columns', $columns);
-        $table->setOption('generator_i18n_fieldNames', $fieldNames);
 
         $this->hasColumns($columns);
 
