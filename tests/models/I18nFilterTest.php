@@ -34,7 +34,7 @@ class I18nFilterTest extends Doctrine_Record
     }
 }
 
-class I18nFilterTestFilter extends Doctrine_Record_Filter
+class I18nFilterTestFilter extends Doctrine_Record_Filter_Standard
 {
     /**
      * {@inheritdoc}

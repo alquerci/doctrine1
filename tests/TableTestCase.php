@@ -60,27 +60,41 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
 
     public function testSerializeWithI18nFilter()
     {
-        $table = $this->conn->getTable('I18nFilterTest');
+        try {
+            $table = $this->conn->getTable('I18nFilterTest');
 
-        $record = $table->create();
-        $record['name'] = 'foo';
-        $this->assertEqual('foo', $record['name']);
+            $record = $table->create();
+            $record['name'] = 'foo';
+            $this->assertEqual('foo', $record['name']);
 
-        // Test the I18nFilterTest record that include the second filter.
-        $this->assertTrue(in_array('I18nFilterTestFilter', array_map('get_class', $table->getFilters())));
-        $expectedFilterNames = array_map('get_class', $table->getFilters());
+            // Test the I18nFilterTest record that include the second filter.
+            $this->assertTrue(in_array('I18nFilterTestFilter', array_map('get_class', $table->getFilters())));
+            $expectedFilterNames = array_map('get_class', $table->getFilters());
 
-        $serializedTable = serialize($table);
+            $serializedTable = serialize($table);
 
-        $unserializedTable = unserialize($serializedTable);
-        $unserializedTable->initializeFromCache($this->conn);
+            // Remove the table from internal class cache.
+            $tables = $this->conn->getTables();
+            $relf = new ReflectionProperty($this->conn, 'tables');
+            unset($tables['I18nFilterTest']);
+            unset($tables['I18nFilterTestTranslation']);
+            $relf->setAccessible(true);
+            $relf->setValue($this->conn, $tables);
+            $relf->setAccessible(false);
 
-        $record = $unserializedTable->create();
+            $unserializedTable = unserialize($serializedTable);
+            $unserializedTable->initializeFromCache($this->conn);
+            $this->conn->addTable($unserializedTable);
 
-        $this->assertEqual($expectedFilterNames, array_map('get_class', $unserializedTable->getFilters()));
+            $record = $unserializedTable->create();
 
-        $record['name'] = 'foo';
-        $this->assertEqual('foo', $record['name']);
+            $this->assertEqual($expectedFilterNames, array_map('get_class', $unserializedTable->getFilters()));
+
+            $record['name'] = 'foo';
+            $this->assertEqual('foo', $record['name']);
+        } catch (Exception $e) {
+            $this->failFromException($e);
+        }
     }
 
     public function testFieldConversion()
