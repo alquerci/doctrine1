@@ -58,10 +58,24 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual($table->getColumns(), $unserializedTable->getColumns());
     }
 
-    public function testSerializeWithI18nFilter()
+    public function testTableCacheWithI18nFilter()
     {
         try {
+            // Remove the table from internal class cache.
+            $tables = $this->conn->getTables();
+            $relf = new ReflectionProperty($this->conn, 'tables');
+            unset($tables['I18nFilterTest']);
+            unset($tables['I18nFilterTestTranslation']);
+            $relf->setAccessible(true);
+            $relf->setValue($this->conn, $tables);
+            $relf->setAccessible(false);
+
+            $this->conn->setAttribute(Doctrine_Core::ATTR_TABLE_CACHE, $cache = new Doctrine_Cache_Array());
             $table = $this->conn->getTable('I18nFilterTest');
+
+            // The cache is filled.
+            $this->assertTrue($cache->contains(md5('I18nFilterTestDOCTRINE_TABLE_CACHE_SALT')));
+            $this->assertTrue($cache->contains(md5('I18nFilterTestTranslationDOCTRINE_TABLE_CACHE_SALT')));
 
             $record = $table->create();
             $record['name'] = 'foo';
@@ -70,8 +84,6 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
             // Test the I18nFilterTest record that include the second filter.
             $this->assertTrue(in_array('I18nFilterTestFilter', array_map('get_class', $table->getFilters())));
             $expectedFilterNames = array_map('get_class', $table->getFilters());
-
-            $serializedTable = serialize($table);
 
             // Remove the table from internal class cache.
             $tables = $this->conn->getTables();
@@ -82,19 +94,20 @@ class Doctrine_Table_TestCase extends Doctrine_UnitTestCase
             $relf->setValue($this->conn, $tables);
             $relf->setAccessible(false);
 
-            $unserializedTable = unserialize($serializedTable);
-            $unserializedTable->initializeFromCache($this->conn);
-            $this->conn->addTable($unserializedTable);
+            // Get table from cache.
+            $cachedTable = $this->conn->getTable('I18nFilterTest');
 
-            $record = $unserializedTable->create();
+            $record = $cachedTable->create();
 
-            $this->assertEqual($expectedFilterNames, array_map('get_class', $unserializedTable->getFilters()));
+            $this->assertEqual($expectedFilterNames, array_map('get_class', $cachedTable->getFilters()));
 
             $record['name'] = 'foo';
             $this->assertEqual('foo', $record['name']);
         } catch (Exception $e) {
             $this->failFromException($e);
         }
+
+        $this->conn->setAttribute(Doctrine_Core::ATTR_TABLE_CACHE, null);
     }
 
     public function testFieldConversion()
