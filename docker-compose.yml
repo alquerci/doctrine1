@@ -1,0 +1,221 @@
+version: '3.5'
+
+services:
+    composer:
+        image: composer
+        working_dir: /app
+        volumes:
+            - .:/app
+        entrypoint:
+            - sh
+            - -c
+            - |
+                exec tail -f /dev/null
+
+    php53:
+        build: .docker/php53
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/lib/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php54:
+        build: .docker/php54
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php55:
+        build: .docker/php55
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php56:
+        build: .docker/php56
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php70:
+        build: .docker/php70
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php71:
+        build: .docker/php71
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php72:
+        build: .docker/php72
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php73:
+        build: .docker/php73
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    php74:
+        build: .docker/php74
+        working_dir: /app/tests
+        volumes:
+            - .:/app
+            - db_socket:/var/run/mysqld
+        entrypoint:
+            - sh
+            - -c
+            - |
+                {
+                    echo 'pdo_mysql.default_socket = /var/run/mysqld/mysql.sock'
+                    echo 'memory_limit = -1'
+                    echo 'short_open_tag = off'
+                    echo 'magic_quotes_gpc = off'
+                } | tee -a /usr/local/etc/php/php.ini
+
+                exec tail -f /dev/null
+        depends_on:
+            - db
+
+    db:
+        image: mysql:5.5
+        environment:
+            - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+        volumes:
+            - db_socket:/tmp
+        entrypoint:
+            - bash
+            - -c
+            - |
+                {
+                    echo "CREATE DATABASE IF NOT EXISTS test;"
+                } | tee /docker-entrypoint-initdb.d/init.sql
+
+                exec /usr/local/bin/docker-entrypoint.sh mysqld
+
+volumes:
+    db_socket:
