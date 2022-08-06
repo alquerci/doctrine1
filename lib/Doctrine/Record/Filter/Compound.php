@@ -64,6 +64,11 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
+        $relatedRecord = $this->findRelatedRecordWithProperty($record, $propertyOrRelation);
+
+        $relatedRecord[$propertyOrRelation] = $value;
+
+        return $record;
     }
 
     /**
@@ -77,7 +82,30 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterGet(Doctrine_Record $record, $propertyOrRelation)
     {
-        throw $this->createUnknownPropertyException($record, $propertyOrRelation);
+        $relatedRecord = $this->findRelatedRecordWithProperty($record, $propertyOrRelation);
+
+        return $relatedRecord[$propertyOrRelation];
+    }
+
+    /**
+     * @thrown Doctrine_Record_UnknownPropertyException
+     */
+    private function findRelatedRecordWithProperty(Doctrine_Record $record, $name)
+    {
+        foreach ($this->_aliases as $relation) {
+            $relatedRecord = $record[$relation];
+
+            if ($this->propertyExists($relatedRecord, $name)) {
+                return $relatedRecord;
+            }
+        }
+
+        throw $this->createUnknownPropertyException($record, $name);
+    }
+
+    private function propertyExists(Doctrine_Record $record, $name)
+    {
+        return isset($record[$name]);
     }
 
     private function createUnknownPropertyException(Doctrine_Record $record, $propertyOrRelation)
@@ -116,36 +144,6 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
                 return $record;
             }
         }
-        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
-    }
-
-    /**
-     * Provides a way for getting property or relation value from the given record.
-     *
-     * @param string $propertyOrRelation
-     *
-     * @return mixed
-     *
-     * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
-     */
-    public function oldfilterGet(Doctrine_Record $record, $propertyOrRelation)
-    {
-        foreach ($this->_aliases as $alias) {
-            // The relationship must be fetched in order to check the field existence.
-            // Related to PHP-7.0 compatibility so an explicit call to method get is required.
-            $record[$alias];
-
-            if ( ! $record->exists()) {
-                if (isset($record[$alias][$propertyOrRelation])) {
-                    return $record[$alias][$propertyOrRelation];
-                }
-            } else {
-                if (isset($record[$alias][$propertyOrRelation])) {
-                    return $record[$alias][$propertyOrRelation];
-                }
-            }
-        }
-
         throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
     }
 }
