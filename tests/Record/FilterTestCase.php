@@ -226,27 +226,8 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite->email = 'foo';
 
         $this->assertNull($composite->Related->address);
-        $this->assertNull($composite->Email->email);
+        $this->assertNull($composite->Email->email); // bug? cannot set prop of fallback relation when exists
     }
-
-
-    // public function testCompoundFilterSupportsAccessingRelatedComponentProperties()
-    // {
-    //     $u = new CompositeRecord();
-    //
-    //     try {
-    //         $u->name    = 'someone';
-    //         $u->address = 'something';
-    //
-    //         $u->save();
-    //
-    //         $this->assertEqual($u->name, 'someone');
-    //         $this->assertEqual($u->address, 'something');
-    //         $this->assertEqual($u->Related->address, 'something');
-    //     } catch (Doctrine_Record_Exception $e) {
-    //         $this->fail();
-    //     }
-    // }
 }
 
 class CompositeRecord extends Doctrine_Record

@@ -119,31 +119,4 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
             $this->_table->getRelation($alias);
         }
     }
-
-    /**
-     * Defines an implementation for filtering the set() method of Doctrine_Record
-     */
-    private function oldfilterSet(Doctrine_Record $record, $propertyOrRelation, $value)
-    {
-        foreach ($this->_aliases as $alias) {
-            // The relationship must be fetched in order to check the field existence.
-            // Related to PHP-7.0 compatibility so an explicit call to method get is required.
-            $record[$alias];
-
-            if ( ! $record->exists()) {
-                if (isset($record[$alias][$propertyOrRelation])) {
-                    $record[$alias][$propertyOrRelation] = $value;
-
-                    return $record;
-                }
-            } else {
-                if (isset($record[$alias][$propertyOrRelation])) {
-                    $record[$alias][$propertyOrRelation] = $value;
-                }
-
-                return $record;
-            }
-        }
-        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
-    }
 }
