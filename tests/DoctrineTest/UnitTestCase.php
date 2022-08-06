@@ -11,12 +11,22 @@ class UnitTestCase
 
     protected static $_lastRunsPassesAndFails = array('passes' => array(), 'fails' => array());
 
+    /**
+     * @var string
+     */
+    private $expectedExceptionClass;
+
     public function setUp()
     {
     }
 
     public function tearDown()
     {
+    }
+
+    protected function expectException($class)
+    {
+        $this->expectedExceptionClass = $class;
     }
 
     public function init()
@@ -294,8 +304,45 @@ class UnitTestCase
 
         $finally();
 
+        if (null !== $this->expectedExceptionClass) {
+            $this->assertThrownException($thrownException);
+
+            return;
+        }
+
         if (null !== $thrownException) {
             throw $thrownException;
         }
+    }
+
+    private function assertThrownException($thrownException)
+    {
+        $expectedExceptionClass = $this->expectedExceptionClass;
+
+        $this->expectedExceptionClass = null;
+
+        if (null === $thrownException) {
+            $this->fail(sprintf('Assert that exception "%s" is thrown.', $expectedExceptionClass));
+
+            return;
+        }
+
+        $thrownExceptionClass = get_class($thrownException);
+
+        if (
+            $expectedExceptionClass === $thrownExceptionClass
+            || is_subclass_of($thrownExceptionClass, $expectedExceptionClass)
+        ) {
+            $this->pass();
+
+            return;
+        }
+
+        var_dump($thrownExceptionClass);
+
+        $this->fail(sprintf('Assert that exception "%s" is thrown, but was "%s".',
+            $expectedExceptionClass,
+            $thrownExceptionClass
+        ));
     }
 }

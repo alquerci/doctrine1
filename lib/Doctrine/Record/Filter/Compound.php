@@ -50,10 +50,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function init()
     {
-        // check that all aliases exist
-        foreach ($this->_aliases as $alias) {
-            $this->_table->getRelation($alias);
-        }
+        $this->validateAliases();
     }
 
     /**
@@ -66,6 +63,39 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
+    {
+    }
+
+    /**
+     * Provides a way for getting property or relation value from the given record.
+     *
+     * @param string $propertyOrRelation
+     *
+     * @return mixed The value of the given property
+     *
+     * @thrown Doctrine_Record_UnknownPropertyException
+     */
+    public function filterGet(Doctrine_Record $record, $propertyOrRelation)
+    {
+        throw $this->createUnknownPropertyException($record, $propertyOrRelation);
+    }
+
+    private function createUnknownPropertyException(Doctrine_Record $record, $propertyOrRelation)
+    {
+        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
+    }
+
+    private function validateAliases()
+    {
+        foreach ($this->_aliases as $alias) {
+            $this->_table->getRelation($alias);
+        }
+    }
+
+    /**
+     * Defines an implementation for filtering the set() method of Doctrine_Record
+     */
+    private function oldfilterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
         foreach ($this->_aliases as $alias) {
             // The relationship must be fetched in order to check the field existence.
@@ -98,7 +128,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      *
      * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
      */
-    public function filterGet(Doctrine_Record $record, $propertyOrRelation)
+    public function oldfilterGet(Doctrine_Record $record, $propertyOrRelation)
     {
         foreach ($this->_aliases as $alias) {
             // The relationship must be fetched in order to check the field existence.
@@ -115,6 +145,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
                 }
             }
         }
+
         throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
     }
 }

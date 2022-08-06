@@ -30,78 +30,140 @@
  * @since       1.0
  * @version     $Revision$
  */
-class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase 
+class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
 {
+    public function tearDown()
+    {
+        InitTestCompositeRecord::$testHasRelatedRelation = true;
+
+        parent::tearDown();
+    }
+
     public function prepareData()
-    { }
+    {
+    }
+
     public function prepareTables()
     {
-        $this->tables = array('CompositeRecord', 'RelatedCompositeRecord');
-        
+        $this->tables = array(
+            'CompositeRecord',
+            'RelatedCompositeRecord',
+        );
+
         parent::prepareTables();
     }
+
     public function testStandardFiltersThrowsExceptionWhenGettingUnknownProperties()
     {
+        $this->expectException('Doctrine_Record_Exception');
+
         $u = new User();
-        
-        try {
-            $u->unknown;
-        
-            $this->fail();
-        } catch (Doctrine_Record_Exception $e) {
-            $this->pass();
-        }
+
+        $u->unknown;
     }
 
     public function testStandardFiltersThrowsExceptionWhenSettingUnknownProperties()
     {
+        $this->expectException('Doctrine_Record_Exception');
+
         $u = new User();
-        
-        try {
-            $u->unknown = 'something';
-        
-            $this->fail();
-        } catch (Doctrine_Record_Exception $e) {
-            $this->pass();
-        }
+
+        $u->unknown = 'something';
     }
 
-    public function testCompoundFilterSupportsAccessingRelatedComponentProperties()
+    public function testCompound_willThrowTable_withAliasedRelationIsNotDefined()
     {
-        $u = new CompositeRecord();
-        
-        try {
-            $u->name    = 'someone';
-            $u->address = 'something';
+        $this->expectException('Doctrine_Table_Exception');
 
-            $u->save();
+        InitTestCompositeRecord::$testHasRelatedRelation = false;
 
-            $this->assertEqual($u->name, 'someone');
-            $this->assertEqual($u->address, 'something');
-            $this->assertEqual($u->Related->address, 'something');
-        } catch (Doctrine_Record_Exception $e) {
-            $this->fail();
-        }
+        new InitTestCompositeRecord();
     }
+
+    public function testCompoundGet_willThrowUndefinedProperty_withGivenNameIsNotAProperty()
+    {
+        $this->expectException('Doctrine_Record_UnknownPropertyException');
+
+        $composite = new CompositeRecord();
+
+        $composite->foo;
+    }
+
+    public function testCompoundSet_willThrowUndefinedProperty_withGivenNameIsNotAProperty()
+    {
+        $this->expectException('Doctrine_Record_UnknownPropertyException');
+
+        $composite = new CompositeRecord();
+
+        $composite->foo = 'foo';
+    }
+
+    // public function testCompoundFilterSupportsAccessingRelatedComponentProperties()
+    // {
+    //     $u = new CompositeRecord();
+    //
+    //     try {
+    //         $u->name    = 'someone';
+    //         $u->address = 'something';
+    //
+    //         $u->save();
+    //
+    //         $this->assertEqual($u->name, 'someone');
+    //         $this->assertEqual($u->address, 'something');
+    //         $this->assertEqual($u->Related->address, 'something');
+    //     } catch (Doctrine_Record_Exception $e) {
+    //         $this->fail();
+    //     }
+    // }
 }
+
 class CompositeRecord extends Doctrine_Record
 {
     public function setTableDefinition()
     {
         $this->hasColumn('name', 'string');
     }
+
     public function setUp()
     {
-    	$this->hasOne('RelatedCompositeRecord as Related', array('foreign' => 'foreign_id'));
+        $this->hasOne('RelatedCompositeRecord as Related', array(
+            'foreign' => 'foreign_id',
+        ));
 
-    	$this->unshiftFilter(new Doctrine_Record_Filter_Compound(array('Related')));
+        $this->unshiftFilter(new Doctrine_Record_Filter_Compound(array(
+            'Related',
+        )));
     }
 }
+
 class RelatedCompositeRecord extends Doctrine_Record
 {
     public function setTableDefinition()
     {
         $this->hasColumn('address', 'string');
         $this->hasColumn('foreign_id', 'integer');
+    }
+}
+
+class InitTestCompositeRecord extends Doctrine_Record
+{
+    public static $testHasRelatedRelation = true;
+
+    public function setTableDefinition()
+    {
+        $this->hasColumn('name', 'string');
+    }
+
+    public function setUp()
+    {
+        if (self::$testHasRelatedRelation) {
+            $this->hasOne('RelatedCompositeRecord as Related', array(
+                'foreign' => 'foreign_id',
+            ));
+        }
+
+        $this->unshiftFilter(new Doctrine_Record_Filter_Compound(array(
+            'Related',
+        )));
     }
 }
