@@ -110,7 +110,12 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
 
     private function createUnknownPropertyException(Doctrine_Record $record, $propertyOrRelation)
     {
-        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $propertyOrRelation, get_class($record)));
+        $message = sprintf('Unknown record property / related component "%s" on "%s"',
+            $propertyOrRelation,
+            get_class($record)
+        );
+
+        throw new Doctrine_Record_UnknownPropertyException($message);
     }
 
     private function validateAliases()
