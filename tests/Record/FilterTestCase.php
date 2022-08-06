@@ -119,13 +119,15 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite->Related->foo = 'foo';
     }
 
-    public function testCompound_willSetGet()
+    public function testCompoundGet_beforeSave()
     {
         $composite = new CompositeRecord();
 
         $composite->address = 'foo';
 
         $this->assertEqual('foo', $composite->address);
+
+        $composite->save();
     }
 
     public function testCompoundGet_afterSaveAddressOnRelation_willGetAdressOnRecord()
@@ -137,6 +139,17 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite->save();
 
         $this->assertEqual('foo', $composite->address);
+    }
+
+    public function testCompoundGet_beforeSaveEmailOnRelation_willGetEmailOnRecord()
+    {
+        $composite = new DistinctTableCompositeRecord();
+
+        $composite->Email->email = 'bar';
+
+        $this->assertEqual('bar', $composite->email);
+
+        $composite->save();
     }
 
     public function testCompoundSet_afterSaveAddressOnRelation_willSetAdressOnRecord()
@@ -175,7 +188,7 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertNull($composite->address);
     }
 
-    public function testCompoundSet_willSetOnFirstRelation()
+    public function testCompoundSet_beforeSave_willSetOnFirstRelation_withUndefinedRelationProperty()
     {
         $composite = new SameTableCompositeRecord();
 
@@ -187,7 +200,8 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertNull($composite->RelatedFallback->address);
     }
 
-    public function testCompoundSet_willSetOnSecondRelation_withFirstHaveNull()
+
+    public function testCompoundSet_onSameTable_beforeSave_willSetOnFirstRelation_withFirstRelationIsNull()
     {
         $composite = new SameTableCompositeRecord();
 
@@ -201,7 +215,21 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertNull($composite->RelatedFallback->address);
     }
 
-    public function testCompoundSet_willSetOnSecondRelation_withFirstRelationIsNull()
+    public function testCompound_onSameTable_afterSave_willSetFirst_withFirstRelationIsNull()
+    {
+        $composite = new SameTableCompositeRecord();
+
+        $composite->Related->address = null;
+
+        $composite->save();
+
+        $composite->address = 'foo';
+
+        $this->assertEqual('foo', $composite->Related->address);
+        $this->assertNull($composite->RelatedFallback->address);
+    }
+
+    public function testCompound_onDistinctTable_beforeSave_willSetOnSecondRelation_withFirstRelationIsNull()
     {
         $composite = new DistinctTableCompositeRecord();
 
@@ -215,7 +243,7 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual('foo', $composite->Email->email);
     }
 
-    public function testCompoundSet_afterSave_willNotSet_withFirstRelationIsNull()
+    public function testCompound_onDistinctTable_afterSave_willNotSet_withFirstRelationIsNull()
     {
         $composite = new DistinctTableCompositeRecord();
 
