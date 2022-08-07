@@ -123,6 +123,9 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
         $record->get($propertyOrRelation);
     }
 
+    /**
+     * @throws Doctrine_Table_Exception
+     */
     private function validateAliases()
     {
         foreach ($this->_aliases as $alias) {
