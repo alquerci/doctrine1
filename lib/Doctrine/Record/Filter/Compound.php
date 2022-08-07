@@ -66,7 +66,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     {
         $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
 
-        $aliasedRecord[$propertyOrRelation] = $value;
+        $aliasedRecord->set($propertyOrRelation, $value);
 
         return $record;
     }
@@ -84,7 +84,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     {
         $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
 
-        return $aliasedRecord[$propertyOrRelation];
+        return $aliasedRecord->get($propertyOrRelation);
     }
 
     /**
@@ -108,7 +108,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     private function getAliasedRecordWithPropertyOrRelation(Doctrine_Record $record, $alias, $propertyOrRelation)
     {
-        $aliasedRecord = $record[$alias];
+        $aliasedRecord = $record->get($alias);
 
         $this->validateThatRecordHavePropertyOrRelation($aliasedRecord, $propertyOrRelation);
 
@@ -120,7 +120,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     private function validateThatRecordHavePropertyOrRelation(Doctrine_Record $record, $propertyOrRelation)
     {
-        $record[$propertyOrRelation];
+        $record->get($propertyOrRelation);
     }
 
     private function validateAliases()
