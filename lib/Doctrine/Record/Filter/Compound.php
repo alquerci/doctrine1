@@ -60,7 +60,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      *
      * @return Doctrine_Record the given record
      *
-     * @thrown Doctrine_Exception when this way is not available
+     * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
@@ -78,7 +78,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      *
      * @return mixed The value of the given property
      *
-     * @thrown Doctrine_Exception
+     * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
      */
     public function filterGet(Doctrine_Record $record, $propertyOrRelation)
     {
@@ -88,7 +88,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     }
 
     /**
-     * @thrown Doctrine_Exception
+     * @thrown Doctrine_Record_UnknownPropertyException
      */
     private function findRelatedRecordWithProperty(Doctrine_Record $record, $propertyOrRelation)
     {
