@@ -187,19 +187,6 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual('foo', $composite->Related->address);
         $this->assertEqual('bar', $composite->Email->email);
     }
-    //
-    // public function testCompound_onDistinctTable_afterSave_willNotSet_withFirstRelationDoesNotHaveProperty()
-    // {
-    //     $composite = new DistinctTableCompositeRecord();
-    //     $composite->Related->address = null;
-    //     $composite->Email->email = null;
-    //     $composite->save();
-    //
-    //     $composite->email = 'foo';
-    //
-    //     $this->assertNull($composite->Related->address);
-    //     $this->assertNull($composite->Email->email); // bug? cannot set prop of fallback relation when exists
-    // }
 }
 
 class CompositeRecord extends Doctrine_Record
