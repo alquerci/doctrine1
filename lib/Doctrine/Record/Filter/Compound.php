@@ -64,6 +64,12 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
+        // if ($record->exists()) {
+        //     $this->setOnlyToFirstRelation($record, $propertyOrRelation, $value);
+        //
+        //     return $record;
+        // }
+
         $relatedRecord = $this->findRelatedRecordWithProperty($record, $propertyOrRelation);
 
         $relatedRecord[$propertyOrRelation] = $value;
@@ -103,9 +109,40 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
         throw $this->createUnknownPropertyException($record, $name);
     }
 
+    private function setOnlyToFirstRelation(Doctrine_Record $record, $name, $value)
+    {
+        try {
+            $relatedRecord = $this->findOnlyFirstRelatedRecord($record, $name);
+
+            $relatedRecord[$name] = $value;
+        } catch (Doctrine_Record_UnknownPropertyException $e) {
+        }
+    }
+
+    private function findOnlyFirstRelatedRecord(Doctrine_Record $record, $name)
+    {
+        foreach ($this->_aliases as $relation) {
+            $relatedRecord = $record[$relation];
+
+            if ($this->propertyExists($relatedRecord, $name)) {
+                return $relatedRecord;
+            }
+
+            break;
+        }
+
+        throw $this->createUnknownPropertyException($record, $name);
+    }
+
     private function propertyExists(Doctrine_Record $record, $name)
     {
-        return isset($record[$name]);
+        try {
+            $record[$name];
+
+            return true;
+        } catch (Doctrine_Record_UnknownPropertyException $e) {
+            return false;
+        }
     }
 
     private function createUnknownPropertyException(Doctrine_Record $record, $propertyOrRelation)

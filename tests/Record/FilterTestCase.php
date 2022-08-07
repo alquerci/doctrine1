@@ -51,6 +51,8 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
             'DistinctTableCompositeRecord',
             'EmailRelatedCompositeRecord',
             'SameTableCompositeRecord',
+            'WithRelationCompositeRecord',
+            'RelationRelatedCompositeRecord',
         );
 
         parent::prepareTables();
@@ -83,7 +85,7 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         new InitTestCompositeRecord();
     }
 
-    public function testCompoundGet_willThrowUndefinedProperty_withGivenNameIsNotAProperty()
+    public function testCompoundGet_willThrowUndefinedProperty_withPropertyDoesNotExists()
     {
         $this->expectException('Doctrine_Record_UnknownPropertyException');
 
@@ -92,7 +94,7 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite->foo;
     }
 
-    public function testCompoundSet_willThrowUndefinedProperty_withGivenNameIsNotAProperty()
+    public function testCompoundSet_willThrowUndefinedProperty_withPropertyDoesNotExists()
     {
         $this->expectException('Doctrine_Record_UnknownPropertyException');
 
@@ -101,161 +103,103 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite->foo = 'foo';
     }
 
-    public function testCompoundGet_willThrowUndefinedProperty_withGivenNameIsNotAPropertyOnRelated()
+    public function testCompoundGet_withOneRelation_willReturnRelationPropertyValue()
     {
-        $this->expectException('Doctrine_Record_UnknownPropertyException');
-
         $composite = new CompositeRecord();
+        $composite->Related->address = 'foo';
 
-        $composite->Related->foo;
+        $actual = $composite->address;
+
+        $this->assertEqual('foo', $actual);
     }
 
-    public function testCompoundSet_willThrowUndefinedProperty_withGivenNameIsNotAPropertyOnRelated()
+    public function testCompoundGet_withTwoDistinctTableRelations_afterGetFromSecondRelation_willReturnRelationPropertyValue()
     {
-        $this->expectException('Doctrine_Record_UnknownPropertyException');
+        $composite = new DistinctTableCompositeRecord();
+        $composite->Email->email = 'bar';
 
-        $composite = new CompositeRecord();
+        $actual = $composite->email;
 
-        $composite->Related->foo = 'foo';
+        $this->assertEqual('bar', $actual);
     }
 
-    public function testCompoundGet_beforeSave()
+    public function testCompoundGet_withTwoRelationsHavingSameProperty_andFirstIsNull_willReturnFirstPropertyValue()
+    {
+        $composite = new SameTableCompositeRecord();
+        $composite->Related->address = null;
+        $composite->RelatedFallback->address = 'foo';
+
+        $actual = $composite->address;
+
+        $this->assertNull($actual);
+    }
+
+    public function testCompoundGet_withNewRecord_andForRelatedComponent()
+    {
+        $composite = new WithRelationCompositeRecord();
+        $composite->Related->Address->address = 'foo';
+
+        $actual = $composite->Address;
+
+        $this->assertEqual('foo', $actual->address);
+    }
+
+    public function testCompoundSet_withNewRecord_andForProperty()
     {
         $composite = new CompositeRecord();
 
         $composite->address = 'foo';
 
-        $this->assertEqual('foo', $composite->address);
-
-        $composite->save();
+        $this->assertEqual('foo', $composite->Related->address);
     }
 
-    public function testCompoundGet_afterSaveAddressOnRelation_willGetAdressOnRecord()
+    public function testCompoundSet_withNewRecord_andForRelatedComponent()
     {
-        $composite = new CompositeRecord();
+        $composite = new WithRelationCompositeRecord();
 
-        $composite->Related->address = 'foo';
+        $addressRecord = new RelatedCompositeRecord();
+        $addressRecord->address = 'foo';
 
-        $composite->save();
+        $composite->Address = $addressRecord;
 
-        $this->assertEqual('foo', $composite->address);
+        $this->assertEqual('foo', $composite->Related->Address->address);
     }
 
-    public function testCompoundGet_beforeSaveEmailOnRelation_willGetEmailOnRecord()
+    public function testCompoundSet_withTwoRelationsHavingSameProperty_andFirstIsNull_willSetOnlyFirstRelation()
     {
-        $composite = new DistinctTableCompositeRecord();
-
-        $composite->Email->email = 'bar';
-
-        $this->assertEqual('bar', $composite->email);
-
-        $composite->save();
-    }
-
-    public function testCompoundSet_afterSaveAddressOnRelation_willSetAdressOnRecord()
-    {
-        $composite = new CompositeRecord();
-
-        $composite->Related->address = 'foo';
-
-        $composite->save();
+        $composite = new SameTableCompositeRecord();
+        $composite->Related->address = null;
+        $composite->RelatedFallback->address = 'foo';
 
         $composite->address = 'bar';
 
         $this->assertEqual('bar', $composite->Related->address);
+        $this->assertEqual('foo', $composite->RelatedFallback->address);
     }
 
-    public function testCompoundGet_afterSaveEmailOnRelation_willGetEmailOnRecord()
+    public function testCompoundSet_withTwoRelationsHavingDistinctProperty_willCanSetOnSecondRelation()
     {
         $composite = new DistinctTableCompositeRecord();
+        $composite->Related->address = 'foo';
 
-        $composite->Email->email = 'bar';
-
-        $composite->save();
-
-        $this->assertEqual('bar', $composite->email);
-    }
-
-    public function testCompoundGet_willUseNullValueInsteadOfFallback()
-    {
-        $composite = new SameTableCompositeRecord();
-
-        $composite->Related->address = null;
-        $composite->RelatedFallback->address = 'foo';
-
-        $composite->save();
-
-        $this->assertNull($composite->address);
-    }
-
-    public function testCompoundSet_beforeSave_willSetOnFirstRelation_withUndefinedRelationProperty()
-    {
-        $composite = new SameTableCompositeRecord();
-
-        $composite->address = 'foo';
-
-        $composite->save();
+        $composite->email = 'bar';
 
         $this->assertEqual('foo', $composite->Related->address);
-        $this->assertNull($composite->RelatedFallback->address);
+        $this->assertEqual('bar', $composite->Email->email);
     }
-
-
-    public function testCompoundSet_onSameTable_beforeSave_willSetOnFirstRelation_withFirstRelationIsNull()
-    {
-        $composite = new SameTableCompositeRecord();
-
-        $composite->Related->address = null;
-
-        $composite->address = 'foo';
-
-        $composite->save();
-
-        $this->assertEqual('foo', $composite->Related->address);
-        $this->assertNull($composite->RelatedFallback->address);
-    }
-
-    public function testCompound_onSameTable_afterSave_willSetFirst_withFirstRelationIsNull()
-    {
-        $composite = new SameTableCompositeRecord();
-
-        $composite->Related->address = null;
-
-        $composite->save();
-
-        $composite->address = 'foo';
-
-        $this->assertEqual('foo', $composite->Related->address);
-        $this->assertNull($composite->RelatedFallback->address);
-    }
-
-    public function testCompound_onDistinctTable_beforeSave_willSetOnSecondRelation_withFirstRelationIsNull()
-    {
-        $composite = new DistinctTableCompositeRecord();
-
-        $composite->Related->address = null;
-
-        $composite->email = 'foo';
-
-        $composite->save();
-
-        $this->assertNull($composite->Related->address);
-        $this->assertEqual('foo', $composite->Email->email);
-    }
-
-    public function testCompound_onDistinctTable_afterSave_willNotSet_withFirstRelationIsNull()
-    {
-        $composite = new DistinctTableCompositeRecord();
-
-        $composite->Related->address = null;
-
-        $composite->save();
-
-        $composite->email = 'foo';
-
-        $this->assertNull($composite->Related->address);
-        $this->assertNull($composite->Email->email); // bug? cannot set prop of fallback relation when exists
-    }
+    //
+    // public function testCompound_onDistinctTable_afterSave_willNotSet_withFirstRelationDoesNotHaveProperty()
+    // {
+    //     $composite = new DistinctTableCompositeRecord();
+    //     $composite->Related->address = null;
+    //     $composite->Email->email = null;
+    //     $composite->save();
+    //
+    //     $composite->email = 'foo';
+    //
+    //     $this->assertNull($composite->Related->address);
+    //     $this->assertNull($composite->Email->email); // bug? cannot set prop of fallback relation when exists
+    // }
 }
 
 class CompositeRecord extends Doctrine_Record
@@ -323,6 +267,25 @@ class SameTableCompositeRecord extends Doctrine_Record
     }
 }
 
+class WithRelationCompositeRecord extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->hasColumn('name', 'string');
+    }
+
+    public function setUp()
+    {
+        $this->hasOne('RelationRelatedCompositeRecord as Related', array(
+            'foreign' => 'foreign_id',
+        ));
+
+        $this->unshiftFilter(new Doctrine_Record_Filter_Compound(array(
+            'Related',
+        )));
+    }
+}
+
 class RelatedCompositeRecord extends Doctrine_Record
 {
     public function setTableDefinition()
@@ -339,6 +302,18 @@ class EmailRelatedCompositeRecord extends Doctrine_Record
     {
         $this->hasColumn('email', 'string');
         $this->hasColumn('foreign_id', 'integer');
+    }
+}
+
+class RelationRelatedCompositeRecord extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->hasColumn('foreign_id', 'integer');
+
+        $this->hasOne('RelatedCompositeRecord as Address', array(
+            'foreign' => 'foreign_id',
+        ));
     }
 }
 
