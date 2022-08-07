@@ -64,7 +64,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
-        $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
+        $aliasedRecord = $this->findAliasedRecordHavingPropertyOrRelation($record, $propertyOrRelation);
 
         $aliasedRecord->set($propertyOrRelation, $value);
 
@@ -82,7 +82,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterGet(Doctrine_Record $record, $propertyOrRelation)
     {
-        $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
+        $aliasedRecord = $this->findAliasedRecordHavingPropertyOrRelation($record, $propertyOrRelation);
 
         return $aliasedRecord->get($propertyOrRelation);
     }
@@ -90,11 +90,11 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     /**
      * @thrown Doctrine_Record_UnknownPropertyException
      */
-    private function findAliasedRecordWithPropertyOrRelation(Doctrine_Record $record, $propertyOrRelation)
+    private function findAliasedRecordHavingPropertyOrRelation(Doctrine_Record $record, $propertyOrRelation)
     {
         foreach ($this->_aliases as $alias) {
             try {
-                return $this->getAliasedRecordWithPropertyOrRelation($record, $alias, $propertyOrRelation);
+                return $this->getAliasedRecordHavingPropertyOrRelation($record, $alias, $propertyOrRelation);
             } catch (Doctrine_Exception $exception) {
                 continue;
             }
@@ -106,7 +106,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     /**
      * @thrown Doctrine_Exception when related record does not have given property or relation
      */
-    private function getAliasedRecordWithPropertyOrRelation(Doctrine_Record $record, $alias, $propertyOrRelation)
+    private function getAliasedRecordHavingPropertyOrRelation(Doctrine_Record $record, $alias, $propertyOrRelation)
     {
         $aliasedRecord = $record->get($alias);
 
