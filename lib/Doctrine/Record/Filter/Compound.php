@@ -95,23 +95,24 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
         foreach ($this->_aliases as $relation) {
             $relatedRecord = $record[$relation];
 
-            if ($this->recordHavePropertyOrRelation($relatedRecord, $name)) {
-                return $relatedRecord;
+            try {
+                $this->validateForRecordHavePropertyOrRelation($relatedRecord, $name);
+            } catch (Doctrine_Record_UnknownPropertyException $exception) {
+                continue;
             }
+
+            return $relatedRecord;
         }
 
         throw Doctrine_Record_UnknownPropertyException::createFromRecordAndProperty($record, $name);
     }
 
-    private function recordHavePropertyOrRelation(Doctrine_Record $record, $name)
+    /**
+     * @thrown Doctrine_Record_UnknownPropertyException
+     */
+    private function validateForRecordHavePropertyOrRelation(Doctrine_Record $record, $name)
     {
-        try {
-            $record[$name];
-
-            return true;
-        } catch (Doctrine_Record_UnknownPropertyException $e) {
-            return false;
-        }
+        $record[$name];
     }
 
     private function validateAliases()
