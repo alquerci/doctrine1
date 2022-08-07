@@ -163,6 +163,15 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual('foo', $actual->address);
     }
 
+    public function testCompoundSet_willReturnTheGivenRecord_toRespectFluentInterface()
+    {
+        $composite = new CompositeRecord();
+
+        $actual = $composite->set('address', 'foo');
+
+        $this->assertIdentical($composite, $actual);
+    }
+
     public function testCompoundSet_withNewRecord_andForProperty()
     {
         $composite = new CompositeRecord();
