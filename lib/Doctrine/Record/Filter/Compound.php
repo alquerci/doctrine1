@@ -60,7 +60,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      *
      * @return Doctrine_Record the given record
      *
-     * @thrown Doctrine_Record_UnknownPropertyException when this way is not available
+     * @thrown Doctrine_Exception when this way is not available
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
@@ -78,7 +78,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      *
      * @return mixed The value of the given property
      *
-     * @thrown Doctrine_Record_UnknownPropertyException
+     * @thrown Doctrine_Exception
      */
     public function filterGet(Doctrine_Record $record, $propertyOrRelation)
     {
@@ -88,31 +88,39 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     }
 
     /**
-     * @thrown Doctrine_Record_UnknownPropertyException
+     * @thrown Doctrine_Exception
      */
-    private function findRelatedRecordWithProperty(Doctrine_Record $record, $name)
+    private function findRelatedRecordWithProperty(Doctrine_Record $record, $propertyOrRelation)
     {
         foreach ($this->_aliases as $relation) {
-            $relatedRecord = $record[$relation];
-
             try {
-                $this->validateForRecordHavePropertyOrRelation($relatedRecord, $name);
-            } catch (Doctrine_Record_UnknownPropertyException $exception) {
+                return $this->getRelatedRecordWithPropertyOrRelation($record, $relation, $propertyOrRelation);
+            } catch (Doctrine_Exception $exception) {
                 continue;
             }
-
-            return $relatedRecord;
         }
 
-        throw Doctrine_Record_UnknownPropertyException::createFromRecordAndProperty($record, $name);
+        throw Doctrine_Record_UnknownPropertyException::createFromRecordAndProperty($record, $propertyOrRelation);
     }
 
     /**
-     * @thrown Doctrine_Record_UnknownPropertyException
+     * @thrown Doctrine_Exception
      */
-    private function validateForRecordHavePropertyOrRelation(Doctrine_Record $record, $name)
+    private function getRelatedRecordWithPropertyOrRelation(Doctrine_Record $record, $relation, $propertyOrRelation)
     {
-        $record[$name];
+        $relatedRecord = $record[$relation];
+
+        $this->validateForRecordHavePropertyOrRelation($relatedRecord, $propertyOrRelation);
+
+        return $relatedRecord;
+    }
+
+    /**
+     * @thrown Doctrine_Exception
+     */
+    private function validateForRecordHavePropertyOrRelation(Doctrine_Record $record, $propertyOrRelation)
+    {
+        $record[$propertyOrRelation];
     }
 
     private function validateAliases()

@@ -53,6 +53,7 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
             'SameTableCompositeRecord',
             'WithRelationCompositeRecord',
             'RelationRelatedCompositeRecord',
+            'WithoutAliasesCompositeRecord',
         );
 
         parent::prepareTables();
@@ -101,6 +102,24 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $composite = new CompositeRecord();
 
         $composite->foo = 'foo';
+    }
+
+    public function testCompoundSet_willThrowUndefinedProperty_withoutAliases()
+    {
+        $this->expectException('Doctrine_Record_UnknownPropertyException');
+
+        $composite = new WithoutAliasesCompositeRecord();
+
+        $composite->foo = 'foo';
+    }
+
+    public function testCompoundGet_willThrowUndefinedProperty_withoutAliases()
+    {
+        $this->expectException('Doctrine_Record_UnknownPropertyException');
+
+        $composite = new WithoutAliasesCompositeRecord();
+
+        $composite->foo;
     }
 
     public function testCompoundGet_withOneRelation_willReturnRelationPropertyValue()
@@ -269,6 +288,20 @@ class WithRelationCompositeRecord extends Doctrine_Record
 
         $this->unshiftFilter(new Doctrine_Record_Filter_Compound(array(
             'Related',
+        )));
+    }
+}
+
+class WithoutAliasesCompositeRecord extends Doctrine_Record
+{
+    public function setTableDefinition()
+    {
+        $this->hasColumn('name', 'string');
+    }
+
+    public function setUp()
+    {
+        $this->unshiftFilter(new Doctrine_Record_Filter_Compound(array(
         )));
     }
 }
