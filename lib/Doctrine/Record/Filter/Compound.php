@@ -108,7 +108,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     private function getAliasedRecordWithPropertyOrRelation(Doctrine_Record $record, $alias, $propertyOrRelation)
     {
-        $aliasedRecord = $record[$alias]
+        $aliasedRecord = $record[$alias];
 
         $this->validateThatRecordHavePropertyOrRelation($aliasedRecord, $propertyOrRelation);
 
