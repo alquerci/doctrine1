@@ -193,6 +193,19 @@ class Doctrine_Record_Filter_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual('foo', $composite->Related->Address->address);
     }
 
+    public function testCompoundSet_withExistingRecord_andForRelatedComponent()
+    {
+        $composite = new WithRelationCompositeRecord();
+        $composite->save();
+
+        $addressRecord = new RelatedCompositeRecord();
+        $addressRecord->address = 'foo';
+
+        $composite->Address = $addressRecord;
+
+        $this->assertEqual('foo', $composite->Related->Address->address);
+    }
+
     public function testCompoundSet_withTwoRelationsHavingSameProperty_andFirstIsNull_willSetOnlyFirstRelation()
     {
         $composite = new SameTableCompositeRecord();
