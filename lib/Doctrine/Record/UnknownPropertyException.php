@@ -32,13 +32,13 @@
  */
 class Doctrine_Record_UnknownPropertyException extends Doctrine_Record_Exception
 {
-    public static function createFromRecordAndProperty(Doctrine_Record $record, $propertyOrRelation)
+    public static function createFromRecordAndProperty(Doctrine_Record $record, $propertyOrRelation, $previous = null)
     {
         $message = sprintf('Unknown record property / related component "%s" on "%s"',
             $propertyOrRelation,
             get_class($record)
         );
 
-        return new Doctrine_Record_UnknownPropertyException($message);
+        return new Doctrine_Record_UnknownPropertyException($message, 0, $previous);
     }
 }
