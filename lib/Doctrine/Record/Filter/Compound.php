@@ -64,9 +64,9 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterSet(Doctrine_Record $record, $propertyOrRelation, $value)
     {
-        $relatedRecord = $this->findAliasedRecordWithProperty($record, $propertyOrRelation);
+        $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
 
-        $relatedRecord[$propertyOrRelation] = $value;
+        $aliasedRecord[$propertyOrRelation] = $value;
 
         return $record;
     }
@@ -82,15 +82,15 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
      */
     public function filterGet(Doctrine_Record $record, $propertyOrRelation)
     {
-        $relatedRecord = $this->findAliasedRecordWithProperty($record, $propertyOrRelation);
+        $aliasedRecord = $this->findAliasedRecordWithPropertyOrRelation($record, $propertyOrRelation);
 
-        return $relatedRecord[$propertyOrRelation];
+        return $aliasedRecord[$propertyOrRelation];
     }
 
     /**
      * @thrown Doctrine_Record_UnknownPropertyException
      */
-    private function findAliasedRecordWithProperty(Doctrine_Record $record, $propertyOrRelation)
+    private function findAliasedRecordWithPropertyOrRelation(Doctrine_Record $record, $propertyOrRelation)
     {
         foreach ($this->_aliases as $alias) {
             try {
