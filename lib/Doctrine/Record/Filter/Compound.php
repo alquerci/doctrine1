@@ -104,7 +104,7 @@ class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
     }
 
     /**
-     * @thrown Doctrine_Exception
+     * @thrown Doctrine_Exception when related record does not have given property or relation
      */
     private function getRelatedRecordWithPropertyOrRelation(Doctrine_Record $record, $relation, $propertyOrRelation)
     {
