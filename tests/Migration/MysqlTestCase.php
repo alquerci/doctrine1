@@ -32,7 +32,7 @@
  */
 class Doctrine_Migration_Mysql_TestCase extends Doctrine_UnitTestCase
 {
-    private $migration;
+    private Doctrine_Migration $migration;
 
     const TABLES = array(
         'MigrationPhonenumber',
@@ -71,6 +71,96 @@ class Doctrine_Migration_Mysql_TestCase extends Doctrine_UnitTestCase
             $this->fail('migration must fail');
         } catch (Doctrine_Migration_Exception $e) {
             $this->assertEqual(0, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Table 'migration_phonenumber' already exists");
+        }
+    }
+
+    public function test_afterSuccessfullDryRunMigration_willNotBumpVersion()
+    {
+        $this->migration->setCurrentVersion(3);
+
+        $this->migration->migrateDryRun(4);
+
+        $this->assertEqual(3, $this->migration->getCurrentVersion());
+    }
+
+    public function test_afterSuccessfullDryRunMigration_forDropTable_cannotMigrateItWithoutDryRun_andKeepSameVersion()
+    {
+        $this->migration->setCurrentVersion(3);
+        $this->migration->migrateDryRun(4);
+
+        try {
+            $this->migration->migrate(4);
+
+            $this->fail('migration must fail');
+        } catch (Doctrine_Migration_Exception $e) {
+            $this->assertEqual(3, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Unknown table 'migration_profile'");
+        }
+    }
+
+    public function test_afterFailedDryRunMigration_willNotBumpVersion()
+    {
+        $this->migration->setCurrentVersion(0);
+
+        $this->migration->migrateDryRun(1);
+
+        $this->assertEqual(0, $this->migration->getCurrentVersion());
+    }
+
+    public function test_afterPartialSuccessUpMigration_versionAndSchemaBecomeInconsistent()
+    {
+        $this->dropTablesOnConnection(['MigrationPhonenumber'], $this->migration->getConnection());
+
+        $this->migration->setCurrentVersion(0);
+
+        try {
+            $this->migration->migrate(2);
+
+            $this->fail('migration must fail');
+        } catch (Doctrine_Migration_Exception $e) {
+            $this->assertEqual(0, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Table 'migration_user' already exists");
+        }
+
+        try {
+            $this->migration->migrate(1);
+
+            $this->fail('migration must fail');
+        } catch (Doctrine_Migration_Exception $e) {
+            $this->assertEqual(0, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Table 'migration_phonenumber' already exists");
+        }
+    }
+
+    public function test_afterPartialSuccessDownMigration_versionAndSchemaBecomeInconsistent(): void
+    {
+        $this->dropTablesOnConnection(self::TABLES, $this->migration->getConnection());
+        $this->migration->setCurrentVersion(1);
+        $this->migration->migrate(2);
+
+        try {
+            $this->migration->migrate(0);
+
+            $this->fail('migration must fail');
+        } catch (Doctrine_Migration_Exception $e) {
+            $this->assertEqual(2, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Unknown table 'migration_phonenumber'");
+        }
+
+        try {
+            $this->migration->migrate(1);
+
+            $this->fail('migration must fail');
+        } catch (Doctrine_Migration_Exception $e) {
+            $this->assertEqual(2, $this->migration->getCurrentVersion());
+
+            $this->assertStringContainsString($e->getMessage(), "Unknown table 'migration_user'");
         }
     }
 }

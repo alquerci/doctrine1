@@ -36,27 +36,46 @@ class UnitTestCase
         $this->_messages[] = $msg;
     }
 
+    public function assertStringContainsString(string $haystack, string $needle): void
+    {
+        $isPass = false !== strpos($haystack, $needle);
+
+        if ($isPass) {
+            $this->pass();
+        } else {
+            $message = $this->makeMassageForTwoValuesComparaison($haystack, $needle, 'contains');
+
+            $this->_fail($message);
+        }
+    }
+
     public function assertEqual($value, $value2)
     {
         if ($value == $value2) {
             $this->pass();
         } else {
-            $seperator = "<br>";
-            if (PHP_SAPI === "cli") {
-                $seperator = "\n";
-            }
+            $message = $this->makeMassageForTwoValuesComparaison($value, $value2, '!=');
 
-            if (is_array($value)) {
-                $value = var_export($value, true);
-            }
-
-            if (is_array($value2)) {
-                $value2 = var_export($value2, true);
-            }
-
-            $message = "$seperator Value1: $value $seperator != $seperator Value2: $value2 $seperator";
             $this->_fail($message);
         }
+    }
+
+    private function makeMassageForTwoValuesComparaison($value, $value2, string $comparison)
+    {
+        $seperator = "<br>";
+        if (PHP_SAPI === "cli") {
+            $seperator = "\n";
+        }
+
+        if (is_array($value)) {
+            $value = var_export($value, true);
+        }
+
+        if (is_array($value2)) {
+            $value2 = var_export($value2, true);
+        }
+
+        return "$seperator Value1: $value $seperator $comparison $seperator Value2: $value2 $seperator";
     }
 
     public function assertIdentical($value, $value2)

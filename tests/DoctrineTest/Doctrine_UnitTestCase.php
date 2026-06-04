@@ -226,6 +226,13 @@ class Doctrine_UnitTestCase extends UnitTestCase
 
     protected function resetTablesOnConnection(array $tables, Doctrine_Connection $connection)
     {
+        $this->dropTablesOnConnection($tables, $connection);
+
+        $connection->export->exportClasses($tables);
+    }
+
+    protected function dropTablesOnConnection(array $tables, Doctrine_Connection $connection)
+    {
         foreach($tables as $name) {
             $name = ucwords($name);
             $table = $connection->getTable($name);
@@ -236,8 +243,6 @@ class Doctrine_UnitTestCase extends UnitTestCase
             } catch(Doctrine_Connection_Exception $e) {
             }
         }
-
-        $connection->export->exportClasses($tables);
     }
 
     public function prepareData()
