@@ -34,11 +34,11 @@ Tests
 
 ### How to execute all tests on all supported PHP versions and dependencies?
 
-    test/bin/test
+    tests/bin/test
 
 ### Want to do specific test ? Ask help with the option.
 
-    test/bin/test --help
+    tests/bin/test --help
 
 ### When you finish your work day, do not forget to clean up your desk
 

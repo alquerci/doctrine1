@@ -52,19 +52,19 @@ Examples:
 
   * How to execute all tests on all supported PHP versions and dependencies?
 
-        $ test/bin/test
+        $ tests/bin/test
 
   * How to execute all tests on specific PHP version ?
 
-        $ test/bin/test --php-versions 'php56 php74 php82'
+        $ tests/bin/test --php-versions 'php56 php74 php82'
 
   * How to execute all tests on lowest and highest dependency preference ?
 
-        $ test/bin/test --dependency-preferences 'lowest highest'
+        $ tests/bin/test --dependency-preferences 'lowest highest'
 
   * How to customize the PHP test runtime ?
 
-        $ test/bin/test --php-test-runtime index.php
+        $ tests/bin/test --php-test-runtime index.php
 
   * When you finish your work day, do not forget to clean up your desk
 
