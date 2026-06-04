@@ -102,7 +102,7 @@ services:
   php74:
     <<: *services_php
     build:
-      context: .docker/php74_83
+      context: .docker/php74_85
       args:
         PHP_VERSION: '7.4'
         MEMCACHE_VERSION: '4.0.5.2'
@@ -111,7 +111,7 @@ services:
   php80:
     <<: *services_php
     build:
-      context: .docker/php74_83
+      context: .docker/php74_85
       args:
         PHP_VERSION: '8.0'
         MEMCACHE_VERSION: '8.0'
@@ -120,7 +120,7 @@ services:
   php81:
     <<: *services_php
     build:
-      context: .docker/php74_83
+      context: .docker/php74_85
       args:
         PHP_VERSION: '8.1'
         MEMCACHE_VERSION: '8.0'
@@ -129,7 +129,7 @@ services:
   php82:
     <<: *services_php
     build:
-      context: .docker/php74_83
+      context: .docker/php74_85
       args:
         PHP_VERSION: '8.2'
         MEMCACHE_VERSION: '8.2'
@@ -138,10 +138,28 @@ services:
   php83:
     <<: *services_php
     build:
-      context: .docker/php74_83
+      context: .docker/php74_85
       args:
         PHP_VERSION: '8.3'
         MEMCACHE_VERSION: '8.2'
+        APCU_VERSION: ''
+
+  php84:
+    <<: *services_php
+    build:
+      context: .docker/php74_85
+      args:
+        PHP_VERSION: '8.4'
+        MEMCACHE_VERSION: '8.2'
+        APCU_VERSION: ''
+
+  php85:
+    <<: *services_php
+    build:
+      context: .docker/php74_85
+      args:
+        PHP_VERSION: '8.5'
+        MEMCACHE_VERSION: ''
         APCU_VERSION: ''
 
 
